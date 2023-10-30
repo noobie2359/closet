@@ -15,7 +15,6 @@ class _ProfilePageState extends State<ProfilePage> {
   User? _user;
   String _nickname = "";
   String _email = "";
-  XFile? _image;
   final ImagePicker _imagePicker = ImagePicker();
 
   @override
@@ -54,13 +53,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _getImage(ImageSource source) async {
-    final pickedFile = await _imagePicker.pickImage(source: source);
+    final pickedFile = await _imagePicker.getImage(source: source);
 
     if (pickedFile != null) {
       // 이미지 선택 시 처리할 내용 추가
-      setState(() {
-        _image=XFile(pickedFile.path);
-      });
     }
   }
 
@@ -189,13 +185,14 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Widget bottomSheet() {
-    return Container(
-      height: 100,
-      width: MediaQuery.of(context).size.width,
-      margin: EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 20,
-      ),
+  return Container(
+    height: 200, // Adjust the height to your preference
+    width: MediaQuery.of(context).size.width,
+    margin: EdgeInsets.symmetric(
+      horizontal: 20,
+      vertical: 20,
+    ),
+    child: SingleChildScrollView(
       child: Column(
         children: <Widget>[
           Text(
@@ -238,6 +235,7 @@ class _ProfilePageState extends State<ProfilePage> {
           )
         ],
       ),
-    );
+    ),
+  );
   }
 }

@@ -30,20 +30,29 @@ class _StatisticsPageState extends State<StatisticsPage> {
         if (data != null &&
             data['imageUrl'] != null &&
             data['date'] != null &&
-            data['items'] != null) {
+            data['itemsDetails'] != null) {
           String? imageUrl = data['imageUrl'] as String?; // String으로 변환
           String? date = data['date'] as String?; // String으로 변환
           Iterable<dynamic>? items =
-              data['items'] as Iterable<dynamic>?; // Iterable<dynamic>으로 변환
+              data['itemsDetails'] as Iterable<dynamic>?; // Iterable<dynamic>으로 변환
 
           if (imageUrl != null && date != null && items != null) {
-            List<String> itemList = items
-                .map((dynamic item) => item.toString())
-                .toList(); // 각 항목을 명시적으로 String으로 캐스트
+            List<Map<String, dynamic>> itemList = [];
+            for (var item in items) {
+              if (item is Map<String, dynamic>) {
+                var firstDetail = item['itemsDetails'][0];
+                if (firstDetail != null && firstDetail['imageUrls'] is List && firstDetail['imageUrls'].isNotEmpty) {
+                  itemList.add({
+                    'item': item['name'].toString(),
+                    'imageUrl': firstDetail['imageUrls'][0]
+                  });
+                }
+              }
+            }
+             // 각 항목을 명시적으로 String으로 캐스트
             tempStatistics.add({
-              'imageUrl': imageUrl,
               'date': date,
-              'items': itemList,
+              'itemsDetails': itemList,
             });
           }
         }
@@ -66,10 +75,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
     Map<String,String> itemImageUrls={};
 
     for (var data in statistics) {
-      List<String>? items = data['items']; // List<String>으로 변환
-      String? imageUrl=data['imageUrl'];
+      List<Map<String,dynamic>>? items = data['itemsDetails']; // List<String>으로 변환
       if (items != null) {
-        for (var item in items) {
+        for (var itemData in items) {
+          String item=itemData['item'];
+          String? imageUrl=itemData['imageUrls'];
           itemFrequency[item] = (itemFrequency[item] ?? 0) + 1;
           if(imageUrl!=null) {
             itemImageUrls[item]=imageUrl;
@@ -101,10 +111,13 @@ class _StatisticsPageState extends State<StatisticsPage> {
 
     Map<String, int> itemFrequency = {};
     for (var data in statistics) {
-      List<String>? items = data['items']; // List<String>으로 변환
+      List<Map<String,dynamic>>? items = data['itemsDetails']; // List<String>으로 변환
       if (items != null) {
-        for (var item in items) {
+        for (var itemData in items) {
+          String? item=itemData['item'];
+          if(item!=null) {
           itemFrequency[item] = (itemFrequency[item] ?? 0) + 1;
+          }
         }
       }
     }

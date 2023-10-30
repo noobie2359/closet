@@ -18,7 +18,7 @@ class ImagePage extends StatefulWidget {
 
 class _ImagePageState extends State<ImagePage> {
   final DateFormat formatter = DateFormat('yyyy-MM-dd');
-  List<Map<String,dynamic>> selectedItemsDetails = []; // to store selected items
+  List<String> selectedItems = []; // to store selected items
   late String formattedDate;
   File? _image;
 
@@ -32,9 +32,9 @@ class _ImagePageState extends State<ImagePage> {
   }
 
   // 파이어베이스에서 아이템 목록을 가져오는 기능
-  Future<List<Map<String,dynamic>>> getItems() async {
+  Future<List<String>> getItems() async {
     List<String> categories = ['상의', '신발', '악세서리', '하의'];
-    List<Map<String,dynamic>> itemList = [];
+    List<String> itemList = [];
 
     for (String category in categories) {
       QuerySnapshot querySnapshot = await FirebaseFirestore.instance
@@ -43,21 +43,23 @@ class _ImagePageState extends State<ImagePage> {
           .collection('items')
           .get();
       for (var doc in querySnapshot.docs) {
-        itemList.add(doc.data() as Map<String,dynamic>);
+        itemList.add(
+            doc.id); // add the document id (which is the item name) to the list
       }
     }
+
     return itemList;
   }
 
   void _addItem() async {
-    List<Map<String,dynamic>> items = await getItems();
+    List<String> items = await getItems();
     if (items.isNotEmpty) {
       setState(() {
-        selectedItemsDetails.add(items[0]);
+        selectedItems.add(items[0]);
       });
     } else {
       print('No items available to add.');
-    } 
+    }
   }
 
   // 파이어베이스에서 데이터 불러오는 함수
@@ -75,7 +77,7 @@ class _ImagePageState extends State<ImagePage> {
 
   // 파이어베이스에 이미지와 선택한 아이템 업로드
   // 파이어베이스에 이미지 업로드
-  Future<void> _uploadImage(DateTime date, List<Map<String,dynamic>> itemsDetails) async {
+  Future<void> _uploadImage(DateTime date, List<String> items) async {
     final DateFormat formatter = DateFormat('yyyy-MM-dd');
     final String formatted = formatter.format(date);
 
@@ -87,17 +89,10 @@ class _ImagePageState extends State<ImagePage> {
     final DocumentReference documentRef =
         FirebaseFirestore.instance.collection('images').doc(formatted);
 
-    List<Map<String,dynamic>> itemsToSave=itemsDetails.map((item) {
-      return {
-        'name': item['name'],
-        'imageUrls':item['image'],
-      };
-    }).toList();
-
     await documentRef.set({
       'imageUrl': downloadUrl,
       'date': formatted,
-      'itemsDetails': itemsToSave, // 선택된 아이템들
+      'items': items, // 선택된 아이템들
     });
 
     // 이미지 업로드가 완료되면 setState 메소드 호출 ,
@@ -143,12 +138,12 @@ class _ImagePageState extends State<ImagePage> {
                   : Center(child: Text('이 날짜에는 업로드된 데일리룩이 없습니다.')),
           ListView.builder(
             shrinkWrap: true,
-            itemCount: selectedItemsDetails.length,
+            itemCount: selectedItems.length,
             itemBuilder: (BuildContext context, int index) {
-              return FutureBuilder<List<Map<String,dynamic>>>(
+              return FutureBuilder<List<String>>(
                 future: getItems(),
                 builder: (BuildContext context,
-                    AsyncSnapshot<List<Map<String,dynamic>>> snapshot) {
+                    AsyncSnapshot<List<String>> snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return CircularProgressIndicator();
                   } else if (snapshot.hasError) {
@@ -160,20 +155,20 @@ class _ImagePageState extends State<ImagePage> {
                     } // add this line
                     return DropdownButton<String>(
                       hint: Text("아이템을 선택해주세요"),
-                      value: selectedItemsDetails[
-                          index]['name'], // ensure this value is in snapshot.data
+                      value: selectedItems[
+                          index], // ensure this value is in snapshot.data
                       onChanged: (String? newValue) {
                         if (newValue != null) {
                           setState(() {
-                            selectedItemsDetails[index]['name'] = newValue;
+                            selectedItems[index] = newValue;
                           });
                         }
                       },
                       items: snapshot.data!
-                          .map<DropdownMenuItem<String>>((itemMap) {
+                          .map<DropdownMenuItem<String>>((String value) {
                         return DropdownMenuItem<String>(
-                          value: itemMap['name'],
-                          child: Text(itemMap['name']),
+                          value: value,
+                          child: Text(value),
                         );
                       }).toList(),
                     );
@@ -209,8 +204,8 @@ class _ImagePageState extends State<ImagePage> {
                   ),
                   ElevatedButton(
                     onPressed: () {
-                      if (selectedItemsDetails.isNotEmpty) {
-                        _uploadImage(widget.date!, selectedItemsDetails);
+                      if (selectedItems.isNotEmpty) {
+                        _uploadImage(widget.date!, selectedItems);
                       } else {
                         print('Please select at least one item.');
                       }
