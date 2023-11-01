@@ -6,14 +6,14 @@ import 'package:personalcloset/screens/screen_index.dart';
 import 'dart:math';
 import 'detailPage.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class MarketPage extends StatefulWidget {
+  const MarketPage({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<MarketPage> createState() => _MarketPageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _MarketPageState extends State<MarketPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(

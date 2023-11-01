@@ -14,8 +14,13 @@ class _CategoryTabState extends State<ItemList> {
       length: 4,
       child: Scaffold(
         appBar: AppBar(
-          title: Text('My Closet'),
+          title: Text(
+            'My Closet',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           bottom: TabBar(
+            indicatorColor: Colors.white,
+            indicatorWeight: 3,
             tabs: [
               Tab(text: '상의'),
               Tab(text: '하의'),
@@ -24,6 +29,7 @@ class _CategoryTabState extends State<ItemList> {
             ],
           ),
           backgroundColor: Colors.green,
+          elevation: 0,
         ),
         body: TabBarView(
           children: [
@@ -62,24 +68,34 @@ class _CategoryTabState extends State<ItemList> {
           return GridView.count(
             crossAxisCount: 3,
             children: snapshot.data!.docs.map((doc) {
-              return GestureDetector(
-                onTap: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) =>
-                          _buildDetailScreen(context, doc.id, category),
-                    ),
-                  );
-                },
-                child: Hero(
-                  tag: doc.id,
-                  child: Image.network(doc['image']),
+              return Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                      color: Colors.grey), // 여기에서 테두리 색상과 두께를 설정할 수 있습니다.
+                  borderRadius: BorderRadius.circular(8), // 옵션으로 코너를 둥글게 처리
+                ),
+                margin: EdgeInsets.all(4), // 여기에서 각 아이템 주변의 여백을 조정할 수 있습니다.
+                child: GestureDetector(
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            _buildDetailScreen(context, doc.id, category),
+                      ),
+                    );
+                  },
+                  child: Hero(
+                    tag: doc.id,
+                    child: Image.network(doc['image'],
+                        fit:
+                            BoxFit.cover), // BoxFit.cover로 이미지가 컨테이너를 꽉 채우도록 조정
+                  ),
                 ),
               );
             }).toList(),
-             mainAxisSpacing: 8.0, // 세로 아이템 간격 설정
-  crossAxisSpacing: 8.0, // 가로 아이템 간격 설정
-  childAspectRatio: 3 / 4, // 각 아이템의 가로 세로 비율 설정
+            mainAxisSpacing: 8.0, // 세로 아이템 간격 설정
+            crossAxisSpacing: 8.0, // 가로 아이템 간격 설정
+            childAspectRatio: 3 / 4, // 각 아이템의 가로 세로 비율 설정
           );
         },
       );
@@ -135,6 +151,7 @@ class _CategoryTabState extends State<ItemList> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text('아이템이 제거되었습니다.'),
+                        backgroundColor: Colors.green,
                       ),
                     );
                     setState(() {});

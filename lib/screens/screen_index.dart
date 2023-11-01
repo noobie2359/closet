@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:personalcloset/tabs/tab_closet.dart';
 import 'package:personalcloset/tabs/tab_home.dart';
 import 'package:personalcloset/tabs/tab_mypage.dart';
-import 'package:personalcloset/tabs/tab_market.dart';
+import 'package:personalcloset/tabs/tab_recommend.dart';
 
 class IndexScreen extends StatefulWidget {
   @override
