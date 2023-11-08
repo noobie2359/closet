@@ -66,22 +66,43 @@ class _StatisticsPageState extends State<StatisticsPage> with SingleTickerProvid
   }
 
   Widget _buildTabContent(Map<String, Map<String, dynamic>> itemData, bool frequent) {
-    List<MapEntry<String, Map<String, dynamic>>> items = frequent
-        ? itemData.entries.where((e) => e.value['count'] >= 5).toList()
-        : itemData.entries.where((e) => e.value['count'] < 5).toList();
+    // 아이템을 빈도수에 따라 내림차순으로 정렬합니다.
+    List<MapEntry<String, Map<String, dynamic>>> sortedItems = itemData.entries.toList()
+        ..sort((a, b) => b.value['count'].compareTo(a.value['count']));
+    
+    // 상위 5개 또는 하위 5개의 아이템을 가져옵니다.
+    List<MapEntry<String, Map<String, dynamic>>> itemsToShow = frequent
+        ? sortedItems.take(5).toList()
+        : sortedItems.reversed.take(5).toList();
 
     return ListView.builder(
-      itemCount: items.length,
+      itemCount: itemsToShow.length,
       itemBuilder: (context, index) {
-        String key = items[index].key;
-        Map<String, dynamic> data = items[index].value;
+        String key = itemsToShow[index].key;
+        Map<String, dynamic> data = itemsToShow[index].value;
         return ListTile(
-          title: Text("$key: ${data['count']}회"),
-          leading: Image.network(data['itemImage']), // 이미지 URL 사용
+          title: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(key),
+              SizedBox(height: 4),  // 간격을 조금 추가합니다.
+              Text("횟수 : ${data['count']}회")
+            ],
+          ),
+          leading: Container(
+            width: 100.0,  // 원하는 너비로 변경
+            height: 100.0,  // 원하는 높이로 변경
+            decoration: BoxDecoration(
+              image: DecorationImage(
+              fit: BoxFit.contain,  // 이미지가 컨테이너에 꽉 차도록 조정
+              image: NetworkImage(data['itemImage'])
+          ),
+        ),
+        ),
         );
       },
     );
-  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -108,8 +129,8 @@ class _StatisticsPageState extends State<StatisticsPage> with SingleTickerProvid
                   Expanded(
                     child: TabBarView(
                       children: [
-                        _buildTabContent(snapshot.data!, true),
-                        _buildTabContent(snapshot.data!, false)
+                        _buildTabContent(snapshot.data!, true),  // 상위 5개
+                        _buildTabContent(snapshot.data!, false)  // 하위 5개
                       ],
                     ),
                   ),
