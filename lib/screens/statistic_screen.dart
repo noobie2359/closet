@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-
+import 'package:personalcloset/tabs/tab_recommend.dart';
 Future<Map<String, Map<String, dynamic>>> getItemCounts() async {
   Map<String, Map<String, dynamic>> itemDetailsMap = {};
 
@@ -80,28 +80,52 @@ class _StatisticsPageState extends State<StatisticsPage> with SingleTickerProvid
       itemBuilder: (context, index) {
         String key = itemsToShow[index].key;
         Map<String, dynamic> data = itemsToShow[index].value;
-        return ListTile(
-          title: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+        int rank = index + 1;  // 순위 계산
+
+        return InkWell(  // InkWell 위젯을 사용하여 탭 가능한 기능을 추가합니다.
+        onTap: () {
+          Navigator.of(context).push(MaterialPageRoute(
+            builder: (context) => IntroScreen(),  // IntroScreen으로 이동합니다.
+          ));
+        },
+        child: ListTile(
+          leading: CircleAvatar(
+            child: Text("$rank"),  // 순위를 leading에 표시
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+          ),
+          title: Row(
             children: [
-              Text(key),
-              SizedBox(height: 4),  // 간격을 조금 추가합니다.
-              Text("횟수 : ${data['count']}회")
+              Container(
+                width: 70.0,
+                height: 70.0,
+                margin: EdgeInsets.only(right: 10.0),  // 사진과 텍스트 사이 간격
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    fit: BoxFit.contain,
+                    image: NetworkImage(data['itemImage']),
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,  // 텍스트 왼쪽 정렬
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    key,  // 아이템 이름
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "횟수: ${data['count']}회",  // 횟수
+                  ),
+                ],
+              ),
             ],
           ),
-          leading: Container(
-            width: 100.0,  // 원하는 너비로 변경
-            height: 100.0,  // 원하는 높이로 변경
-            decoration: BoxDecoration(
-              image: DecorationImage(
-              fit: BoxFit.contain,  // 이미지가 컨테이너에 꽉 차도록 조정
-              image: NetworkImage(data['itemImage'])
-          ),
         ),
-        ),
-        );
-      },
-    );
+      );
+    },
+  );
 }
 
   @override

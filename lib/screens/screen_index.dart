@@ -48,7 +48,8 @@ class _IndexScreenState extends State<IndexScreen> {
           });
         },
         items: [
-          BottomNavigationBarItem(icon: Icon(Icons.shop), label: 'market'),
+          BottomNavigationBarItem(
+              icon: Icon(Icons.accessibility), label: 'recommend'),
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Mypage'),
           BottomNavigationBarItem(icon: Icon(Icons.checkroom), label: 'Closet'),

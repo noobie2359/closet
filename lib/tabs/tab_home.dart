@@ -19,6 +19,22 @@ class TabHome extends StatefulWidget {
 class _CalendarState extends State<TabHome> {
   DateTime today = DateTime.now();
 
+  String getWeatherComment(String condition) {
+    if (condition.contains('rain')) {
+      return '비가 오고 있어요. 우산을 챙기세요!';
+    } else if (condition.contains('clear')) {
+      return '날씨가 맑아요. 산책을 즐기기 좋은 날이에요!';
+    } else if (condition.contains('clouds')) {
+      return '구름이 많아요. 실내 활동을 계획해 보세요.';
+    } else if (condition.contains('snow')) {
+      return '눈이 내리고 있어요. 따뜻하게 입고 나가세요!';
+    } else if (condition.contains('thunderstorm')) {
+      return '천둥번개를 동반한 비가 오고 있어요. 안전에 유의하세요!';
+    } else {
+      return '날씨 정보를 확인하세요.';
+    }
+  }
+
   void _onDaySelected(DateTime day, DateTime focusedDay) async {
     setState(() {
       today = day;
@@ -172,26 +188,6 @@ class _CalendarState extends State<TabHome> {
           ),
         ),
         SizedBox(height: 16),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => StatisticsPage(),
-              ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            primary: Colors.green[500],
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
-            ),
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          ),
-          icon: Icon(Icons.insert_chart, color: Colors.white),
-          label: Text('통계 보기', style: TextStyle(color: Colors.white)),
-        ),
-        SizedBox(height: 16),
         // "날씨 정보" 섹션 추가
         FutureBuilder<Map<String, dynamic>>(
           future: fetchWeatherData(),
@@ -201,6 +197,10 @@ class _CalendarState extends State<TabHome> {
                 // 날씨 상태에 따른 아이콘 결정
                 IconData weatherIcon;
                 String condition = snapshot.data!['condition'];
+                String weatherComment = getWeatherComment(
+                    condition); // Generate the comment based on the condition
+
+                // Decide the weather icon based on the condition
                 if (condition.contains('rain')) {
                   weatherIcon = Icons.umbrella;
                 } else if (condition.contains('clear')) {
@@ -215,27 +215,43 @@ class _CalendarState extends State<TabHome> {
                     borderRadius: BorderRadius.circular(15.0),
                     color: Colors.blue[100],
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: Column(
                     children: [
-                      // 날씨 아이콘과 상태 표시
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Icon(weatherIcon,
-                              size: 32.0, color: Colors.blue[800]),
-                          SizedBox(width: 8.0),
+                          // 날씨 아이콘과 상태 표시
+                          Row(
+                            children: [
+                              Icon(weatherIcon,
+                                  size: 32.0, color: Colors.blue[800]),
+                              SizedBox(width: 8.0),
+                              Text(
+                                '상태: ${snapshot.data!['condition']}',
+                                style: TextStyle(
+                                    fontSize: 16.0,
+                                    fontWeight: FontWeight.bold),
+                              ),
+                            ],
+                          ),
+                          // 온도 표시
                           Text(
-                            '상태: ${snapshot.data!['condition']}',
+                            '온도: ${snapshot.data!['temperature']}°C',
                             style: TextStyle(
                                 fontSize: 16.0, fontWeight: FontWeight.bold),
                           ),
                         ],
                       ),
-                      // 온도 표시
-                      Text(
-                        '온도: ${snapshot.data!['temperature']}°C',
-                        style: TextStyle(
-                            fontSize: 16.0, fontWeight: FontWeight.bold),
+                      // 날씨 코멘트 추가
+                      Padding(
+                        padding: EdgeInsets.only(top: 8.0),
+                        child: Text(
+                          weatherComment, // Display the generated comment
+                          style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue[800]),
+                        ),
                       ),
                     ],
                   ),
@@ -248,25 +264,56 @@ class _CalendarState extends State<TabHome> {
             }
           },
         ),
-        SizedBox(height: 16),
-        ElevatedButton.icon(
-          onPressed: () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (context) => MarketPage(),
+        SizedBox(
+          height: 16,
+        ),
+        Row(
+          mainAxisAlignment:
+              MainAxisAlignment.spaceEvenly, // 버튼들 사이에 고르게 공간을 분배합니다.
+          children: [
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MarketPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Color.fromARGB(255, 255, 94, 0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               ),
-            );
-          },
-          style: ElevatedButton.styleFrom(
-            primary: Color.fromARGB(255, 255, 94, 0),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(30.0),
+              icon: Icon(Icons.shop, color: Colors.white),
+              label: Text('중고 장터', style: TextStyle(color: Colors.white)),
             ),
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-          ),
-          icon: Icon(Icons.shop, color: Colors.white),
-          label: Text('중고 장터', style: TextStyle(color: Colors.white)),
+            SizedBox(width: 16), // 버튼 사이의 간격을 조정합니다.
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => StatisticsPage(),
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                primary: Colors.green[500],
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30.0),
+                ),
+                padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              ),
+              icon: Icon(Icons.insert_chart, color: Colors.white),
+              label: Text('통계 보기', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+        SizedBox(
+          height: 16,
         ),
       ],
     );
